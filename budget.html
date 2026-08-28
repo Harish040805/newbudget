@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Budget SPA</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #fff;
+  margin: 0;
+  padding: 15px;
+  color: #333;
+}
+.container {
+  max-width: 1500px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 20px;
+}
+h2 {
+  text-align: center;
+  color: #1e3a8a;
+  margin-top: 0;
+}
+.c{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;}
+.b{flex:1;min-width:0;}
+.salary-section {
+  margin-bottom: 20px;
+  text-align: center;
+}
+.salary-section label {
+  font-weight: bold;
+  font-size: 18px;
+  color: #282828;
+}
+.salary-section input {
+  width: 100px;
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+.card {
+  background: #fff;
+  border: 1px solid #2c6fff;
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+}
+.card label {
+  display: block;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #282828;
+}
+.card-inputs {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+.card input {
+  width: 45%;
+  padding: 6px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+}
+.card input.err {
+  color: red;
+}
+.clear-btn {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.clear-btn:hover {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+button {
+    background-color: #3e9fff;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+}
+button:hover {
+    background-color: #2c85dd;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+}
+#st {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+#t input:focus {
+  outline: none;
+  background-color: #d4e9ff;
+}
+</style>
+</head>
+<body>
+  <div id="m">
+    <div id="c">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <button onclick="clr()" style="width:50px;">C</button>
+        <span onclick="cM()" style="cursor:pointer;font-size:20px;font-weight:bold;">&times;</span>
+      </div>
+      <input type="text" id="d" readonly>
+      <div id="b">
+        <button onclick="p('%')">%</button>
+        <button onclick="p('^')">^</button>
+        <button onclick="p('rt')">rt</button>
+        <button onclick="p('/')">/</button>
+        <button onclick="p('7')">7</button>
+        <button onclick="p('8')">8</button>
+        <button onclick="p('9')">9</button>
+        <button onclick="p('*')">*</button>
+        <button onclick="p('4')">4</button>
+        <button onclick="p('5')">5</button>
+        <button onclick="p('6')">6</button>
+        <button onclick="p('-')">-</button>
+        <button onclick="p('1')">1</button>
+        <button onclick="p('2')">2</button>
+        <button onclick="p('3')">3</button>
+        <button onclick="p('+')">+</button>
+        <button onclick="p('0')">0</button>
+        <button onclick="p('.')">.</button>
+        <button onclick="l()">log</button>
+        <button onclick="e()">=</button>
+      </div>
+    </div>
+  </div>
+  <style>
+    body { font-family: sans-serif; }
+    #m { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+    #c { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 260px; }
+    #d { width: 100%; height: 40px; margin-bottom: 10px; font-size: 18px; text-align: right; box-sizing: border-box; }
+    #b { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+    button { height: 40px; font-size: 16px; cursor: pointer; }
+  </style>
+  <script>
+    let v = document.getElementById('d');
+    function o() { document.getElementById('m').style.display = 'flex'; }
+    function cM() { document.getElementById('m').style.display = 'none'; }
+    function p(v1) { v.value += v1; }
+    function clr() { v.value = ''; }
+    function l() { if(v.value) v.value = Math.log10(eval(v.value)); }
+    function e() {
+      try {
+        let s = v.value;
+        if(s.includes('rt')) {
+          let a = s.split('rt');
+          v.value = Math.pow(eval(a[1]), 1 / eval(a[0]));
+        } else if(s.includes('^')) {
+          let a = s.split('^');
+          v.value = Math.pow(eval(a[0]), eval(a[1]));
+        } else if(s.includes('%')) {
+          let a = s.split('%');
+          v.value = a[1] ? (eval(a[0]) * eval(a[1])) / 100 : eval(a[0]) / 100;
+        } else {
+          v.value = eval(s);
+        }
+      } catch(e) {
+        v.value = 'Error';
+      }
+    }
+  </script>
+<div class="container">
+<div class="c">
+<div class="broc">
+  <h2>Budget SPA</h2>
+  <div class="salary-section">
+    <label for="s">SALARY: </label>
+    <input type="number" id="s" placeholder="Enter salary" oninput="sv()">
+    <select id="st" onchange="cs()">
+      <option value="m">Monthly</option>
+      <option value="y">Yearly</option>
+    </select>
+    <select id="ct" onchange="fP()">
+      <option value="Chennai">Chennai</option>
+      <option value="Madurai">Madurai</option>
+      <option value="Thiruvallur">Thiruvallur</option>
+      <option value="Trichy">Trichy</option>
+      <option value="Coimbatore">Coimbatore</option>
+      <option value="Salem">Salem</option>
+      <option value="Vellore">Vellore</option>
+    </select>
+    <button class="clear-btn" onclick="cl()">Clear All Data</button>  
+    <button onclick="o()">Open Calculator</button>
+  </div>
+  <div id="w" style="color:red; text-align:center; font-weight:bold; margin-bottom:15px; display:none;">Total Allocated Exceeds Salary!</div>
+  <div class="grid">
+    <div class="card"><label>RENT</label><div class="card-inputs"><input type="number" class="a" placeholder="Allocated" oninput="sv()"><input type="number" class="e" placeholder="Expected" oninput="sv()"></div></div>
+    <div class="card"><label>UTILITIES</label><div class="card-inputs"><input type="number" class="a" placeholder="Allocated" oninput="sv()"><input type="number" class="e" placeholder="Expected" oninput="sv()"></div></div>
+    <div class="card"><label>GROCERIES</label><div class="card-inputs"><input type="number" class="a" placeholder="Allocated" oninput="sv()"><input type="number" class="e" placeholder="Expected" oninput="sv()"></div></div>
+    <div class="card"><label>TRAVEL</label><div class="card-inputs"><input type="number" class="a" placeholder="Allocated" oninput="sv()"><input type="number" class="e" placeholder="Expected" oninput="sv()"></div></div>
+    <div class="card"><label>INSURANCE</label><div class="card-inputs"><input type="number" class="a" placeholder="Allocated" oninput="sv()"><input type="number" class="e" placeholder="Expected" oninput="sv()"></div></div>
+    <div class="card"><label>ENTERTAINMENT</label><div class="card-inputs"><input type="number" class="a" placeholder="Allocated" oninput="sv()"><input type="number" class="e" placeholder="Expected" oninput="sv()"></div></div>
+    <div class="card"><label>HEALTH</label><div class="card-inputs"><input type="number" class="a" placeholder="Allocated" oninput="sv()"><input type="number" class="e" placeholder="Expected" oninput="sv()"></div></div>
+    <div class="card"><label>EDUCATION</label><div class="card-inputs"><input type="number" class="a" placeholder="Allocated" oninput="sv()"><input type="number" class="e" placeholder="Expected" oninput="sv()"></div></div>
+    <div class="card"><label>MASSAGE</label><div class="card-inputs"><input type="number" class="a" placeholder="Allocated" oninput="sv()"><input type="number" class="e" placeholder="Expected" oninput="sv()"></div></div>
+    <div class="card"><label>PARLOUR</label><div class="card-inputs"><input type="number" class="a" placeholder="Allocated" oninput="sv()"><input type="number" class="e" placeholder="Expected" oninput="sv()"></div></div>
+    <div class="card"><label>SAVINGS</label><div class="card-inputs"><input type="number" class="a" placeholder="Allocated" oninput="sv()"><input type="number" class="e" placeholder="Expected" oninput="sv()"></div></div>
+    <div class="card"><label>OTHER</label><div class="card-inputs"><input type="number" class="a" placeholder="Allocated" oninput="sv()"><input type="number" class="e" placeholder="Expected" oninput="sv()"></div></div>
+  </div>
+</div>
+<div class="b" style="max-width:800px;margin:0px 20px 20px 20px;padding:20px;background-color:#f4f7fa;border: 1px solid #2c6fff;border-radius:8px;box-shadow:0 4px 8px rgba(0,0,0,0.1);font-family:Arial,sans-serif;max-height:600px;display:flex;flex-direction:column;">
+  <div style="margin-bottom:20px;text-align:center;flex-shrink:0;">
+    <h2 style="margin:0 0 10px 0;">Products to be Bought</h2>
+    <button onclick="aD()" style="padding:6px 12px;background-color:#2563eb;color:#fff;border:none;border-radius:4px;cursor:pointer;">+ Add Date Block</button>
+  </div>
+  <div id="dC" style="overflow-y:auto;flex:1;"></div>
+<div style="margin-bottom:10px;margin-top:30px;text-align:center;flex-shrink:0;">
+    <h2 style="margin:0 0 10px 0;">Loan Container</h2>
+  </div>
+  <div style="display:flex;gap:10px;flex:1;overflow:hidden;">
+    <div style="flex:1;display:flex;flex-direction:column;background:#fff;padding:10px;border-radius:6px;border:1px solid #bfdbfe;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-weight:bold;color:#dc2626;font-size:14px;">Loan Given</span>
+        <button onclick="aL('g')" style="padding:4px 8px;background-color:#ef4444;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;">+ Add</button>
+      </div>
+      <div id="lCG" style="overflow-y:auto;flex:1;"></div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;background:#fff;padding:10px;border-radius:6px;border:1px solid #bfdbfe;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-weight:bold;color:#059669;font-size:14px;">Loan Got</span>
+        <button onclick="aL('t')" style="padding:4px 8px;background-color:#10b981;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;">+ Add</button>
+      </div>
+      <div id="lCT" style="overflow-y:auto;flex:1;"></div>
+    </div>
+  </div>
+</div>
+<script>
+let k = 'td_data_v2';
+let g = () => JSON.parse(localStorage.getItem(k)) || [];
+let sP = (d) => localStorage.setItem(k, JSON.stringify(d));
+
+let r = () => {
+  let list = g();
+  let c = document.getElementById('dC');
+  c.innerHTML = '';
+  list.forEach((block, x) => {
+    let b = document.createElement('div');
+    b.style.cssText = 'background:#fff;padding:15px;margin-bottom:15px;border-radius:6px;border:1px solid #bfdbfe;box-shadow:0 2px 4px rgba(0,0,0,0.05);';
+    
+    let h = document.createElement('div');
+    h.style.cssText = 'display:flex;gap:10px;align-items:center;margin-bottom:10px;';
+    
+    let dt = document.createElement('input');
+    dt.type = 'date';
+    dt.value = block.d || '';
+    dt.style.cssText = 'padding:6px;border:1px solid #93c5fd;border-radius:4px;color:#1e3a8a;';
+    dt.onchange = (ev) => uD(x, ev.target.value);
+    
+    let dB = document.createElement('button');
+    dB.textContent = 'Delete';
+    dB.style.cssText = 'background:#ef4444;color:#fff;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;margin-left:auto;';
+    dB.onclick = () => dD(x);
+    
+    h.appendChild(dt);
+    h.appendChild(dB);
+    
+let iC = document.createElement('div');
+    iC.style.cssText = 'display:flex;gap:5px;margin-bottom:10px;';
+    
+    let inp = document.createElement('input');
+    inp.type = 'text';
+    inp.placeholder = 'Add the product...';
+    inp.id = 'inp_' + x;
+    inp.style.cssText = 'flex:1;padding:6px;border:1px solid #93c5fd;border-radius:4px;outline:none;';
+
+    let nInp = document.createElement('input');
+    nInp.type = 'number';
+    nInp.placeholder = 'Price';
+    nInp.id = 'ninp_' + x;
+    nInp.style.cssText = 'width:70px;padding:6px;border:1px solid #93c5fd;border-radius:4px;outline:none;';
+    
+    let aB = document.createElement('button');
+    aB.textContent = 'Add';
+    aB.style.cssText = 'padding:6px 12px;background-color:#2563eb;color:#fff;border:none;border-radius:4px;cursor:pointer;';
+    aB.onclick = () => aI(x);
+    
+    iC.appendChild(inp);
+    iC.appendChild(nInp);
+    iC.appendChild(aB);
+    
+    let ul = document.createElement('ul');
+    ul.style.cssText = 'list-style:none;padding:0;margin:0;';
+    let t = 0;
+    
+    block.i.forEach((item, y) => {
+      t += Number(item.v) || 0;
+      let li = document.createElement('li');
+      li.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:#f8fafc;padding:6px 8px;margin-bottom:6px;border-left:3px solid #2563eb;border-radius:3px;';
+      
+      let ti = document.createElement('input');
+      ti.type = 'text';
+      ti.value = item.t || '';
+      ti.style.cssText = 'border:none;outline:none;background:transparent;flex:1;color:#1e293b;font-size:14px;';
+      ti.onchange = (ev) => uI(x, y, ev.target.value, item.v);
+
+      let vi = document.createElement('input');
+      vi.type = 'number';
+      vi.value = item.v || 0;
+      vi.style.cssText = 'border:none;outline:none;background:transparent;width:60px;color:#1e293b;font-size:14px;text-align:right;';
+      vi.onchange = (ev) => uI(x, y, item.t, ev.target.value);
+      
+      let delB = document.createElement('button');
+      delB.textContent = 'Delete';
+      delB.style.cssText = 'background:#ef4444;color:#fff;border:none;padding:3px 6px;border-radius:3px;cursor:pointer;margin-left:6px;font-size:12px;';
+      delB.onclick = () => dI(x, y);
+      
+      li.appendChild(ti);
+      li.appendChild(vi);
+      li.appendChild(delB);
+      ul.appendChild(li);
+    });
+
+    let s = document.createElement('span');
+    s.style.cssText = 'display:block;margin-top:10px;font-weight:bold;color:#1e3a8a;text-align:right;';
+    s.textContent = 'Total Spent: ' + t;
+    
+    b.appendChild(h);
+    b.appendChild(iC);
+    b.appendChild(ul);
+    b.appendChild(s);
+    c.appendChild(b);
+  });
+};
+
+let aD = () => {
+  let list = g();
+  list.push({ d: '', i: [] });
+  sP(list);
+  r();
+};
+
+let uD = (x, v) => {
+  let list = g();
+  list[x].d = v;
+  sP(list);
+};
+
+let dD = (x) => {
+  let list = g();
+  list.splice(x, 1);
+  sP(list);
+  r();
+};
+
+let aI = (x) => {
+  let inp = document.getElementById('inp_' + x);
+  let nInp = document.getElementById('ninp_' + x);
+  if (!inp.value.trim()) return;
+  let list = g();
+  list[x].i.push({ t: inp.value.trim(), v: Number(nInp.value) || 0 });
+  sP(list);
+  r();
+};
+
+let uI = (x, y, t, v) => {
+  let list = g();
+  list[x].i[y] = { t: t, v: Number(v) || 0 };
+  sP(list);
+  r();
+};
+
+let dI = (x, y) => {
+  let list = g();
+  list[x].i.splice(y, 1);
+  sP(list);
+  r();
+};
+
+r();
+
+let lk = 'ln_data_v1';
+let gl = () => JSON.parse(localStorage.getItem(lk)) || [];
+let sl = (d) => localStorage.setItem(lk, JSON.stringify(d));
+
+let rl = () => {
+  let list = gl();
+  let cG = document.getElementById('lCG');
+  let cT = document.getElementById('lCT');
+  if(!cG || !cT) return;
+  cG.innerHTML = '';
+  cT.innerHTML = '';
+  list.forEach((item, x) => {
+    let b = document.createElement('div');
+    b.style.cssText = 'background:#f8fafc;padding:8px;margin-bottom:8px;border-radius:4px;border:1px solid ' + (item.t === 'g' ? '#fca5a5' : '#6ee7b7') + ';display:flex;flex-direction:column;gap:4px;';
+    
+    let h = document.createElement('div');
+    h.style.cssText = 'display:flex;justify-content:flex-end;';
+
+    let delB = document.createElement('button');
+    delB.textContent = '×';
+    delB.style.cssText = 'background:#ef4444;color:#fff;border:none;padding:1px 5px;border-radius:3px;cursor:pointer;font-size:12px;line-height:1;';
+    delB.onclick = () => dL(x);
+
+    h.appendChild(delB);
+
+    let iC = document.createElement('div');
+    iC.style.cssText = 'display:flex;flex-direction:column;gap:4px;';
+
+    let pInp = document.createElement('input');
+    pInp.type = 'text';
+    pInp.placeholder = 'Person';
+    pInp.value = item.p || '';
+    pInp.style.cssText = 'width:100%;padding:4px;border:1px solid #93c5fd;border-radius:3px;outline:none;font-size:12px;box-sizing:border-box;';
+    pInp.onchange = (ev) => uL(x, ev.target.value, item.a);
+
+    let aInp = document.createElement('input');
+    aInp.type = 'number';
+    aInp.placeholder = 'Amt';
+    aInp.value = item.a || '';
+    aInp.style.cssText = 'width:100%;padding:4px;border:1px solid #93c5fd;border-radius:3px;outline:none;font-size:12px;box-sizing:border-box;';
+    aInp.onchange = (ev) => uL(x, item.p, ev.target.value);
+
+    iC.appendChild(pInp);
+    iC.appendChild(aInp);
+
+    b.appendChild(h);
+    b.appendChild(iC);
+
+    if(item.t === 'g') {
+      cG.appendChild(b);
+    } else {
+      cT.appendChild(b);
+    }
+  });
+};
+
+let aL = (type) => {
+  let list = gl();
+  list.push({ t: type, p: '', a: '' });
+  sl(list);
+  rl();
+};
+
+let uL = (x, p, a) => {
+  let list = gl();
+  list[x].p = p;
+  list[x].a = a;
+  sl(list);
+};
+
+let dL = (x) => {
+  let list = gl();
+  list.splice(x, 1);
+  sl(list);
+  rl();
+};
+
+rl();
+</script>
+</div>
+</div>
+<script>
+let db, m = { r: 2, c: 2 };
+
+function initDB() {
+  const q = indexedDB.open("GridDB", 1);
+  q.onupgradeneeded = e => {
+    db = e.target.result;
+    db.createObjectStore("meta", { keyPath: "id" });
+    db.createObjectStore("cells", { keyPath: "k" });
+  };
+  q.onsuccess = e => {
+    db = e.target.result;
+    const tx = db.transaction("cells", "readonly");
+    const req = tx.objectStore("cells").getAll();
+    req.onsuccess = () => {
+      if (req.result.length === 0) {
+        const wtx = db.transaction("cells", "readwrite");
+        const store = wtx.objectStore("cells");
+        for (let r = 0; r < m.r; r++) {
+          for (let c = 0; c < m.c; c++) {
+            store.put({ k: r + "," + c, v: "0" });
+          }
+        }
+        wtx.oncomplete = () => lG();
+      } else {
+        lG();
+      }
+    };
+  };
+}
+
+function sc(r, c, v) {
+  const tx = db.transaction("cells", "readwrite");
+  tx.objectStore("cells").put({ k: r + "," + c, v: v });
+}
+
+function uT() {
+  const cd = window.gCd || [];
+  let rt = Array(m.r).fill(0);
+  let ct = Array(m.c).fill(0);
+  let gt = 0;
+
+  for (let r = 0; r < m.r; r++) {
+    for (let c = 0; c < m.c; c++) {
+      const cell = cd.find(x => x.k === r + "," + c);
+      const v = cell ? parseFloat(cell.v) : NaN;
+      if (!isNaN(v)) {
+        rt[r] += v;
+        ct[c] += v;
+        gt += v;
+      }
+    }
+  }
+
+  const tb = document.querySelector("#t tbody");
+  for (let r = 0; r < m.r; r++) {
+    const tr = tb.rows[r];
+    if (tr) {
+      let rc = tr.querySelector(".r-tot");
+      if (!rc) {
+        rc = document.createElement("td");
+        rc.className = "r-tot";
+        rc.style.fontWeight = "bold";
+        tr.appendChild(rc);
+      }
+      rc.textContent = rt[r];
+    }
+  }
+
+  let trT = tb.querySelector(".c-tot-row");
+  if (!trT) {
+    trT = document.createElement("tr");
+    trT.className = "c-tot-row";
+    trT.style.fontWeight = "bold";
+    tb.appendChild(trT);
+  }
+  trT.innerHTML = "<td>Total</td>";
+  for (let c = 0; c < m.c; c++) {
+    const td = document.createElement("td");
+    td.textContent = ct[c];
+    trT.appendChild(td);
+  }
+  const tdG = document.createElement("td");
+  tdG.textContent = gt;
+  trT.appendChild(tdG);
+}
+
+function lG() {
+  const tx = db.transaction("cells", "readonly");
+  const req = tx.objectStore("cells").getAll();
+  req.onsuccess = () => {
+    const cd = req.result;
+    window.gCd = cd;
+    const tb = document.querySelector("#t tbody");
+    tb.innerHTML = "";
+    for (let r = 0; r < m.r; r++) {
+      const tr = document.createElement("tr");
+      const tdS = document.createElement("td");
+      tdS.style.fontWeight = "bold";
+      tdS.style.background = "#f0f0f0";
+      tdS.textContent = r + 1;
+      tr.appendChild(tdS);
+
+      for (let c = 0; c < m.c; c++) {
+        const td = document.createElement("td");
+        td.style.position = "relative";
+        td.style.padding = "15px 20px";
+
+        const inp = document.createElement("input");
+        inp.style.width = "100%";
+        inp.style.border = "none";
+        inp.style.textAlign = "center";
+        const cell = cd.find(x => x.k === r + "," + c);
+        inp.value = cell && cell.v !== undefined ? cell.v : "0";
+        inp.oninput = () => {
+          sc(r, c, inp.value);
+          let item = cd.find(x => x.k === r + "," + c);
+          if (item) item.v = inp.value;
+          else cd.push({ k: r + "," + c, v: inp.value });
+          uT();
+        };
+
+        const bT = document.createElement("button");
+        bT.textContent = "+";
+        bT.style.cssText = "position:absolute;top:0;left:50%;transform:translateX(-50%);padding:0 3px;font-size:10px;cursor:pointer;";
+        bT.onclick = () => aRAt(r);
+
+        const bB = document.createElement("button");
+        bB.textContent = "+";
+        bB.style.cssText = "position:absolute;bottom:0;left:50%;transform:translateX(-50%);padding:0 3px;font-size:10px;cursor:pointer;";
+        bB.onclick = () => aRAt(r + 1);
+
+        const bL = document.createElement("button");
+        bL.textContent = "+";
+        bL.style.cssText = "position:absolute;left:0;top:50%;transform:translateY(-50%);padding:0 3px;font-size:10px;cursor:pointer;";
+        bL.onclick = () => aCAt(c);
+
+        const bR = document.createElement("button");
+        bR.textContent = "+";
+        bR.style.cssText = "position:absolute;right:0;top:50%;transform:translateY(-50%);padding:0 3px;font-size:10px;cursor:pointer;";
+        bR.onclick = () => aCAt(c + 1);
+
+        const bD = document.createElement("button");
+        bD.textContent = "🗑";
+        bD.style.cssText = "position:absolute;top:0;right:0;padding:0 2px;font-size:9px;cursor:pointer;background:#e74c3c;color:#fff;border:none;";
+        bD.onclick = () => dC(r, c);
+
+        td.appendChild(inp);
+        td.appendChild(bT);
+        td.appendChild(bB);
+        td.appendChild(bL);
+        td.appendChild(bR);
+        td.appendChild(bD);
+        tr.appendChild(td);
+      }
+      tb.appendChild(tr);
+    }
+    uT();
+  };
+}
+
+function aRAt(i) {
+  m.r++;
+  const tx = db.transaction("cells", "readwrite");
+  const store = tx.objectStore("cells");
+  store.getAll().onsuccess = e => {
+    const all = e.target.result;
+    store.clear();
+    all.forEach(item => {
+      let [r, c] = item.k.split(",").map(Number);
+      if (r >= i) r++;
+      store.put({ k: r + "," + c, v: item.v });
+    });
+    for (let c = 0; c < m.c; c++) store.put({ k: i + "," + c, v: "0" });
+    tx.oncomplete = () => lG();
+  };
+}
+
+function aCAt(i) {
+  m.c++;
+  const tx = db.transaction("cells", "readwrite");
+  const store = tx.objectStore("cells");
+  store.getAll().onsuccess = e => {
+    const all = e.target.result;
+    store.clear();
+    all.forEach(item => {
+      let [r, c] = item.k.split(",").map(Number);
+      if (c >= i) c++;
+      store.put({ k: r + "," + c, v: item.v });
+    });
+    for (let r = 0; r < m.r; r++) store.put({ k: r + "," + i, v: "0" });
+    tx.oncomplete = () => lG();
+  };
+}
+
+function dRAt(i) {
+  if (m.r <= 1) return;
+  m.r--;
+  const tx = db.transaction("cells", "readwrite");
+  const store = tx.objectStore("cells");
+  store.getAll().onsuccess = e => {
+    const all = e.target.result;
+    store.clear();
+    all.forEach(item => {
+      let [r, c] = item.k.split(",").map(Number);
+      if (r === i) return;
+      if (r > i) r--;
+      store.put({ k: r + "," + c, v: item.v });
+    });
+    tx.oncomplete = () => lG();
+  };
+}
+
+function dC(r, c) {
+  sc(r, c, "0");
+  lG();
+}
+
+function cs() {
+  const i = document.getElementById("s");
+  const t = document.getElementById("st").value;
+  let v = Number(i.value) || 0;
+  if (v > 0) {
+    if (t === "y") {
+      i.value = v * 12;
+    } else {
+      i.value = v / 12;
+    }
+  }
+  localStorage.setItem("st", t);
+  sv();
+}
+
+let lp = {};
+
+function fP() {
+  let c = document.getElementById("ct").value;
+  localStorage.setItem("ct", c);
+  fetch(`https://api.exchangerate-api.com/v4/latest/INR`)
+    .then(r => r.json())
+    .then(d => {
+      let m = { "Chennai": 1.2, "Coimbatore": 1.1, "Madurai": 1.0, "Trichy": 0.95, "Thiruvallur": 0.9, "Salem": 0.85, "Vellore": 0.88 }[c] || 1;
+      let y = new Date().getFullYear();
+      let f = 1 + ((y - 2024) * 0.05);
+      lp = {
+        0: 10000 * m * f, 1: 3000 * m * f, 2: 5000 * m * f, 3: 2000 * m * f,
+        4: 1500 * m * f, 5: 1200 * m * f, 6: 2500 * m * f, 7: 4000 * m * f,
+        8: 1000 * m * f, 9: 800 * m * f, 10: 2000 * m * f, 11: 1000 * m * f
+      };
+      sv();
+    })
+    .catch(() => sv());
+}
+
+function sv() {
+  const s = Number(document.getElementById("s").value) || 0;
+  localStorage.setItem("s", s);
+  localStorage.setItem("st", document.getElementById("st").value);
+  const al = document.querySelectorAll(".a");
+  const ex = document.querySelectorAll(".e");
+  let t = 0;
+  al.forEach((el, x) => {
+    let v = Number(el.value) || 0;
+    t += v;
+    localStorage.setItem("a" + x, v);
+    let ev = Number(ex[x].value) || 0;
+    let min = lp[x] || 0;
+    if ((el.value !== "" && v < min) || (ex[x].value !== "" && ev < min) || (el.value !== "" && ex[x].value !== "" && v < ev)) {
+      el.classList.add("err");
+      ex[x].classList.add("err");
+    } else {
+      el.classList.remove("err");
+      ex[x].classList.remove("err");
+    }
+  });
+  ex.forEach((el, x) => {
+    localStorage.setItem("e" + x, Number(el.value) || 0);
+  });
+  const w = document.getElementById("w");
+  if (t > s && s > 0) {
+    w.style.display = "block";
+  } else {
+    w.style.display = "none";
+  }
+}
+
+function ld() {
+  document.getElementById("st").value = localStorage.getItem("st") || "m";
+  document.getElementById("ct").value = localStorage.getItem("ct") || "Chennai";
+  document.getElementById("s").value = localStorage.getItem("s") || "";
+  const al = document.querySelectorAll(".a");
+  const ex = document.querySelectorAll(".e");
+  al.forEach((el, x) => {
+    el.value = localStorage.getItem("a" + x) || "";
+  });
+  ex.forEach((el, x) => {
+    el.value = localStorage.getItem("e" + x) || "";
+  });
+  fP();
+  initDB();
+}
+
+function cl() {
+  if (confirm("Clear all budget data?")) {
+    localStorage.clear();
+    const tx = db.transaction("cells", "readwrite");
+    tx.objectStore("cells").clear();
+    ld();
+  }
+}
+
+window.onload = ld;
+
+</script>
+</body>
+</html>
